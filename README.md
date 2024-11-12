@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ORM Demo
 
-## Getting Started
+ACM CSUF Dev FA24
 
-First, run the development server:
+### Clone Repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/kourosh-alasti/orm-demo
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Visit neon.tech
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+[https://console.neon.tech/app/projects](https://console.neon.tech/app/projects)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+#### What Now?
 
-## Learn More
+**Create Project**
 
-To learn more about Next.js, take a look at the following resources:
+<div align="center">
+<img src="./screenshots/create-project.png"/>
+</div>
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Set Compute**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+<div>
+<img src="./screenshots/set-compute.png"/>
+</div>
 
-## Deploy on Vercel
+**Get Connection String**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+<div><img src="./screenshots/get-conn-url.png"/></div>
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+#### Set `DATABASE_URL` in `.env`
+
+## Schema Design and Query Building
+
+### Schema Design (for PostgreSQL)
+
+`postTable`: Represents blog posts with the fields `id`, `title`, and `content`
+
+- Each Post has a random generated UUID
+- Both `title` and `content` are required fields
+
+`commentTable`: Represents comments associated to a post with fields, `id`, `message`, and `postId`
+
+- `postId` is a foreign key that links each comment to a specific post
+
+#### Push Schema to Database
+
+```bash
+npm run db:push
+```
+
+### Query Building
+
+#### Inserting Data
+
+```typescript
+const newPost = await db
+  .insert(postTable)
+  .values({
+    title: "My First Post",
+    content: "Content of First Post",
+  })
+  .returning();
+```
+
+```typescript
+const newComment = await db
+  .insert(commentTable)
+  .values({
+    message: "Great post!",
+    postId: newPost[0].id,
+  })
+  .returning();
+```
+
+#### Querying Data
+
+```typescript
+const allPosts = await db.select().from(postTable);
+```
+
+```typescript
+const commentsForSpecificPost = await db
+  .select()
+  .from(commentTable)
+  .where(commentTable.postId.eq(newPost[0].id));
+```
+
+```typescript
+const postAndComments = await db.query.postTable.findMany({
+  with: {
+    comments: true,
+  },
+});
+```
+
+#### Start Drizzle-Kit Studio to view tables and run queries
+
+```bash
+npm run db:studio
+```
