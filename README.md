@@ -96,6 +96,25 @@ const postAndComments = await db.query.postTable.findMany({
 });
 ```
 
+#### Updating Data
+
+```typescript
+const updatedPost = await db
+  .update(postTable)
+  .set({ title: "Updated Title" })
+  .where(postTable.id.eq(newPost[0].id))
+  .returning();
+```
+
+#### Deleting Data
+
+```typescript
+const deletedComment = await db
+  .delete(commentTable)
+  .where(commentTable.id.eq(newComment[0].id))
+  .returning();
+```
+
 #### Start Drizzle-Kit Studio to view tables and run queries
 
 ```bash
